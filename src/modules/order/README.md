@@ -8,15 +8,17 @@
 
 ### 1. 获取订单列表
 
-**URL**: `GET /order`
+**URL**: `POST /order/list`
 
 **功能**: 获取所有订单的列表，支持按用户ID筛选
 
-**请求参数**: 
+**请求体**: 
 
-| 参数 | 类型 | 必填 | 描述 |
-|------|------|------|------|
-| userId | number | 否 | 用户ID |
+```javascript
+{
+  "userId": 1 // 可选
+}
+```
 
 **响应**: 
 
@@ -59,10 +61,79 @@
 
 /**
  * @param {number} [userId] - 用户ID
- * @returns {Array<Order>} 订单列表
+ * @returns {Object} 统一响应格式
+ * @property {Array<Order>} data - 订单列表
+ * @property {number} code - 状态码
+ * @property {string} message - 响应消息
  */
-[
-  {
+{
+  "data": [
+    {
+      "id": 1,
+      "userId": 1,
+      "user": {
+        "id": 1,
+        "username": "admin",
+        "name": "管理员"
+      },
+      "items": [
+        {
+          "productId": 1,
+          "productName": "iPhone 15 Pro",
+          "quantity": 1,
+          "price": 7999
+        },
+        {
+          "productId": 3,
+          "productName": "AirPods Pro 2",
+          "quantity": 1,
+          "price": 1899
+        }
+      ],
+      "totalAmount": 9898,
+      "status": "completed",
+      "paymentMethod": "credit_card",
+      "shippingAddress": {
+        "name": "管理员",
+        "phone": "13800138000",
+        "address": "北京市朝阳区某某街道123号"
+      },
+      "createdAt": "2026-01-25T10:00:00.000Z",
+      "updatedAt": "2026-01-25T10:30:00.000Z"
+    },
+    // 更多订单...
+  ],
+  "code": 200,
+  "message": "操作成功"
+}
+```
+
+### 2. 获取订单详情
+
+**URL**: `POST /order/detail`
+
+**功能**: 根据ID获取单个订单的详细信息
+
+**请求体**: 
+
+```javascript
+{
+  "id": 1
+}
+```
+
+**响应**: 
+
+```javascript
+/**
+ * @param {number} id - 订单ID
+ * @returns {Object} 统一响应格式
+ * @property {Order|null} data - 订单详情或null
+ * @property {number} code - 状态码
+ * @property {string} message - 响应消息
+ */
+{
+  "data": {
     "id": 1,
     "userId": 1,
     "user": {
@@ -95,67 +166,14 @@
     "createdAt": "2026-01-25T10:00:00.000Z",
     "updatedAt": "2026-01-25T10:30:00.000Z"
   },
-  // 更多订单...
-]
-```
-
-### 2. 获取订单详情
-
-**URL**: `GET /order/:id`
-
-**功能**: 根据ID获取单个订单的详细信息
-
-**请求参数**: 
-
-| 参数 | 类型 | 必填 | 描述 |
-|------|------|------|------|
-| id | number | 是 | 订单ID |
-
-**响应**: 
-
-```javascript
-/**
- * @param {number} id - 订单ID
- * @returns {Order|null} 订单详情或null
- */
-{
-  "id": 1,
-  "userId": 1,
-  "user": {
-    "id": 1,
-    "username": "admin",
-    "name": "管理员"
-  },
-  "items": [
-    {
-      "productId": 1,
-      "productName": "iPhone 15 Pro",
-      "quantity": 1,
-      "price": 7999
-    },
-    {
-      "productId": 3,
-      "productName": "AirPods Pro 2",
-      "quantity": 1,
-      "price": 1899
-    }
-  ],
-  "totalAmount": 9898,
-  "status": "completed",
-  "paymentMethod": "credit_card",
-  "shippingAddress": {
-    "name": "管理员",
-    "phone": "13800138000",
-    "address": "北京市朝阳区某某街道123号"
-  },
-  "createdAt": "2026-01-25T10:00:00.000Z",
-  "updatedAt": "2026-01-25T10:30:00.000Z"
+  "code": 200,
+  "message": "操作成功"
 }
 ```
 
 ### 3. 创建订单
 
-**URL**: `POST /order`
+**URL**: `POST /order/create`
 
 **功能**: 创建新订单
 
@@ -195,53 +213,55 @@
 ```javascript
 /**
  * @param {CreateOrderDto} orderData - 订单数据
- * @returns {Order} 创建的订单
+ * @returns {Object} 统一响应格式
+ * @property {Order} data - 创建的订单
+ * @property {number} code - 状态码
+ * @property {string} message - 响应消息
  */
 {
-  "id": 4,
-  "userId": 1,
-  "user": {
-    "id": 1,
-    "username": "admin",
-    "name": "管理员"
+  "data": {
+    "id": 4,
+    "userId": 1,
+    "user": {
+      "id": 1,
+      "username": "admin",
+      "name": "管理员"
+    },
+    "items": [
+      {
+        "productId": 2,
+        "productName": "MacBook Pro 14",
+        "quantity": 1,
+        "price": 15999
+      }
+    ],
+    "totalAmount": 15999,
+    "status": "pending",
+    "paymentMethod": "credit_card",
+    "shippingAddress": {
+      "name": "管理员",
+      "phone": "13800138000",
+      "address": "北京市朝阳区某某街道123号"
+    },
+    "createdAt": "2026-01-29T00:00:00.000Z",
+    "updatedAt": "2026-01-29T00:00:00.000Z"
   },
-  "items": [
-    {
-      "productId": 2,
-      "productName": "MacBook Pro 14",
-      "quantity": 1,
-      "price": 15999
-    }
-  ],
-  "totalAmount": 15999,
-  "status": "pending",
-  "paymentMethod": "credit_card",
-  "shippingAddress": {
-    "name": "管理员",
-    "phone": "13800138000",
-    "address": "北京市朝阳区某某街道123号"
-  },
-  "createdAt": "2026-01-29T00:00:00.000Z",
-  "updatedAt": "2026-01-29T00:00:00.000Z"
+  "code": 200,
+  "message": "操作成功"
 }
 ```
 
 ### 4. 更新订单状态
 
-**URL**: `PUT /order/:id/status`
+**URL**: `POST /order/updateStatus`
 
 **功能**: 更新指定ID订单的状态
-
-**请求参数**: 
-
-| 参数 | 类型 | 必填 | 描述 |
-|------|------|------|------|
-| id | number | 是 | 订单ID |
 
 **请求体**: 
 
 ```javascript
 {
+  "id": 1,
   "status": "shipping"
 }
 ```
@@ -252,72 +272,91 @@
 /**
  * @param {number} id - 订单ID
  * @param {string} status - 新的订单状态
- * @returns {Order|null} 更新后的订单或null
+ * @returns {Object} 统一响应格式
+ * @property {Order|null} data - 更新后的订单或null
+ * @property {number} code - 状态码
+ * @property {string} message - 响应消息
  */
 {
-  "id": 1,
-  "userId": 1,
-  "user": {
+  "data": {
     "id": 1,
-    "username": "admin",
-    "name": "管理员"
-  },
-  "items": [
-    {
-      "productId": 1,
-      "productName": "iPhone 15 Pro",
-      "quantity": 1,
-      "price": 7999
+    "userId": 1,
+    "user": {
+      "id": 1,
+      "username": "admin",
+      "name": "管理员"
     },
-    {
-      "productId": 3,
-      "productName": "AirPods Pro 2",
-      "quantity": 1,
-      "price": 1899
-    }
-  ],
-  "totalAmount": 9898,
-  "status": "shipping",
-  "paymentMethod": "credit_card",
-  "shippingAddress": {
-    "name": "管理员",
-    "phone": "13800138000",
-    "address": "北京市朝阳区某某街道123号"
+    "items": [
+      {
+        "productId": 1,
+        "productName": "iPhone 15 Pro",
+        "quantity": 1,
+        "price": 7999
+      },
+      {
+        "productId": 3,
+        "productName": "AirPods Pro 2",
+        "quantity": 1,
+        "price": 1899
+      }
+    ],
+    "totalAmount": 9898,
+    "status": "shipping",
+    "paymentMethod": "credit_card",
+    "shippingAddress": {
+      "name": "管理员",
+      "phone": "13800138000",
+      "address": "北京市朝阳区某某街道123号"
+    },
+    "createdAt": "2026-01-25T10:00:00.000Z",
+    "updatedAt": "2026-01-29T00:00:00.000Z"
   },
-  "createdAt": "2026-01-25T10:00:00.000Z",
-  "updatedAt": "2026-01-29T00:00:00.000Z"
+  "code": 200,
+  "message": "操作成功"
 }
 ```
 
 ### 5. 删除订单
 
-**URL**: `DELETE /order/:id`
+**URL**: `POST /order/delete`
 
 **功能**: 删除指定ID的订单
 
-**请求参数**: 
+**请求体**: 
 
-| 参数 | 类型 | 必填 | 描述 |
-|------|------|------|------|
-| id | number | 是 | 订单ID |
+```javascript
+{
+  "id": 1
+}
+```
 
 **响应**: 
 
 ```javascript
 /**
  * @param {number} id - 订单ID
- * @returns {boolean} 删除成功返回true，失败返回false
+ * @returns {Object} 统一响应格式
+ * @property {boolean} data - 删除成功返回true，失败返回false
+ * @property {number} code - 状态码
+ * @property {string} message - 响应消息
  */
-true
+{
+  "data": true,
+  "code": 200,
+  "message": "操作成功"
+}
 ```
 
 ## 错误处理
 
 | 状态码 | 错误信息 | 描述 |
 |--------|----------|------|
-| 400 | Bad Request | 请求参数错误 |
-| 404 | Not Found | 订单不存在 |
-| 500 | Internal Server Error | 服务器内部错误 |
+| 200 | SUCCESS | 操作成功 |
+| 400 | BAD_REQUEST | 请求参数错误 |
+| 401 | UNAUTHORIZED | 未授权 |
+| 403 | FORBIDDEN | 禁止访问 |
+| 404 | NOT_FOUND | 资源不存在 |
+| 500 | INTERNAL_SERVER_ERROR | 服务器内部错误 |
 
 ## 示例请求
 
@@ -325,20 +364,20 @@ true
 
 ```powershell
 # 获取所有订单
-curl -Uri http://localhost:3000/order -Method GET
+curl -Uri http://localhost:3000/order/list -Method POST
 
 # 按用户ID获取订单
-curl -Uri "http://localhost:3000/order?userId=1" -Method GET
+curl -Uri http://localhost:3000/order/list -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"userId": 1}'
 
 # 获取订单详情
-curl -Uri http://localhost:3000/order/1 -Method GET
+curl -Uri http://localhost:3000/order/detail -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"id": 1}'
 
 # 创建订单
-curl -Uri http://localhost:3000/order -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"userId": 1, "items": [{"productId": 2, "productName": "MacBook Pro 14", "quantity": 1, "price": 15999}], "shippingAddress": {"name": "管理员", "phone": "13800138000", "address": "北京市朝阳区某某街道123号"}}'
+curl -Uri http://localhost:3000/order/create -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"userId": 1, "items": [{"productId": 2, "productName": "MacBook Pro 14", "quantity": 1, "price": 15999}], "shippingAddress": {"name": "管理员", "phone": "13800138000", "address": "北京市朝阳区某某街道123号"}}'
 
 # 更新订单状态
-curl -Uri http://localhost:3000/order/1/status -Method PUT -Headers @{"Content-Type"="application/json"} -Body '{"status": "shipping"}'
+curl -Uri http://localhost:3000/order/updateStatus -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"id": 1, "status": "shipping"}'
 
 # 删除订单
-curl -Uri http://localhost:3000/order/1 -Method DELETE
+curl -Uri http://localhost:3000/order/delete -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"id": 1}'
 ```
