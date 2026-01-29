@@ -1,38 +1,69 @@
-import { Controller, Get, Post, Put, Param, Body, Query } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { PaymentService } from './payment.service';
+import { ResponseUtil } from '../../common/types/response.util';
+import { StatusCode } from '../../common/types/status-code';
 
 @Controller('payment')
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
-  @Get('methods')
+  @Post('methods')
   async getPaymentMethods() {
-    return this.paymentService.getPaymentMethods();
+    try {
+      const methods = await this.paymentService.getPaymentMethods();
+      return ResponseUtil.success(methods, '获取支付方式列表成功');
+    } catch (error) {
+      return ResponseUtil.error(StatusCode.INTERNAL_SERVER_ERROR, '获取支付方式列表失败');
+    }
   }
 
-  @Get()
-  async findAll(@Query('userId') userId?: number, @Query('orderId') orderId?: number) {
-    if (userId) {
-      return this.paymentService.findByUserId(userId);
+  @Post('list')
+  async findAll(@Body('userId') userId?: number, @Body('orderId') orderId?: number) {
+    try {
+      let payments;
+      if (userId) {
+        payments = await this.paymentService.findByUserId(userId);
+      } else if (orderId) {
+        payments = await this.paymentService.findByOrderId(orderId);
+      } else {
+        payments = await this.paymentService.findAll();
+      }
+      return ResponseUtil.success(payments, '获取支付列表成功');
+    } catch (error) {
+      return ResponseUtil.error(StatusCode.INTERNAL_SERVER_ERROR, '获取支付列表失败');
     }
-    if (orderId) {
-      return this.paymentService.findByOrderId(orderId);
-    }
-    return this.paymentService.findAll();
   }
 
-  @Post()
+  @Post('create')
   async create(@Body() paymentData: any) {
-    return this.paymentService.create(paymentData);
+    try {
+      const payment = await this.paymentService.create(paymentData);
+      return ResponseUtil.success(payment, '创建支付成功');
+    } catch (error) {
+      return ResponseUtil.error(StatusCode.INTERNAL_SERVER_ERROR, '创建支付失败');
+    }
   }
 
-  @Put(':id/status')
-  async updateStatus(@Param('id') id: number, @Body('status') status: string) {
-    return this.paymentService.updateStatus(id, status);
+  @Post('updateStatus')
+  async updateStatus(@Body('id') id: number, @Body('status') status: string) {
+    try {
+      const payment = await this.paymentService.updateStatus(id, status);
+      if (!payment) {
+        return ResponseUtil.error(StatusCode.NOT_FOUND, '支付不存在');
+      }
+      return ResponseUtil.success(payment, '更新支付状态成功');
+    } catch (error) {
+      return ResponseUtil.error(StatusCode.INTERNAL_SERVER_ERROR, '更新支付状态失败');
+    }
   }
 
-  @Post(':id/refund')
-  async refund(@Param('id') id: number, @Body('amount') amount: number) {
-    return this.paymentService.refund(id, amount);
+  @Post('refund')
+  async refund(@Body('id') id: number, @Body('amount') amount: number) {
+    try {
+      const refund = await this.paymentService.refund(id, amount);
+      return ResponseUtil.success(refund, '退款成功');
+    } catch (error) {
+      return ResponseUtil.error(StatusCode.INTERNAL_SERVER_ERROR, '退款失败');
+    }
   }
 }

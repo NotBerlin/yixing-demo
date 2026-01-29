@@ -1,6 +1,8 @@
 // 导入NestJS核心装饰器和模块
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { UserService } from './user.service';
+import { ResponseUtil } from '../../common/types/response.util';
+import { StatusCode } from '../../common/types/status-code';
 
 /**
  * 用户控制器
@@ -23,68 +25,103 @@ export class UserController {
   /**
    * 获取用户列表
    * 
-   * @Get() 装饰器：定义GET请求的路由，路径为基础路径 '/'（完整路径：/user）
+   * @Post('list') 装饰器：定义POST请求的路由，路径为 '/list'（完整路径：/user/list）
    * async/await 语法：处理异步操作，与React中的异步处理类似
    * 
    * @returns 用户列表
    */
-  @Get()
+  @Post('list')
   async findAll() {
-    return this.userService.findAll();
+    try {
+      const users = await this.userService.findAll();
+      return ResponseUtil.success(users, '获取用户列表成功');
+    } catch (error) {
+      return ResponseUtil.error(StatusCode.INTERNAL_SERVER_ERROR, '获取用户列表失败');
+    }
   }
 
   /**
    * 获取单个用户详情
    * 
-   * @Get(':id') 装饰器：定义带参数的GET请求路由，路径为 '/:id'（完整路径：/user/:id）
-   * @Param('id') 装饰器：从URL参数中获取id值并绑定到参数
+   * @Post('detail') 装饰器：定义POST请求的路由，路径为 '/detail'（完整路径：/user/detail）
+   * @Body() 装饰器：从请求体中获取数据并绑定到参数
    * 
-   * @param id 用户ID
+   * @param params 请求参数
    * @returns 用户详情
    */
-  @Get(':id')
-  async findOne(@Param('id') id: number) {
-    return this.userService.findOneById(id);
+  @Post('detail')
+  async findOne(@Body('id') id: number) {
+    try {
+      const user = await this.userService.findOneById(id);
+      if (!user) {
+        return ResponseUtil.error(StatusCode.NOT_FOUND, '用户不存在');
+      }
+      return ResponseUtil.success(user, '获取用户详情成功');
+    } catch (error) {
+      return ResponseUtil.error(StatusCode.INTERNAL_SERVER_ERROR, '获取用户详情失败');
+    }
   }
 
   /**
    * 创建用户
    * 
-   * @Post() 装饰器：定义POST请求的路由，路径为基础路径 '/'（完整路径：/user）
+   * @Post('create') 装饰器：定义POST请求的路由，路径为 '/create'（完整路径：/user/create）
    * @Body() 装饰器：从请求体中获取数据并绑定到参数
    * 
    * @param userData 用户数据
    * @returns 创建的用户
    */
-  @Post()
+  @Post('create')
   async create(@Body() userData: any) {
-    return this.userService.create(userData);
+    try {
+      const user = await this.userService.create(userData);
+      return ResponseUtil.success(user, '创建用户成功');
+    } catch (error) {
+      return ResponseUtil.error(StatusCode.INTERNAL_SERVER_ERROR, '创建用户失败');
+    }
   }
 
   /**
    * 更新用户
    * 
-   * @Put(':id') 装饰器：定义PUT请求的路由，路径为 '/:id'（完整路径：/user/:id）
+   * @Post('update') 装饰器：定义POST请求的路由，路径为 '/update'（完整路径：/user/update）
+   * @Body() 装饰器：从请求体中获取数据并绑定到参数
    * 
-   * @param id 用户ID
-   * @param userData 更新的用户数据
+   * @param params 请求参数，包含id和更新的用户数据
    * @returns 更新后的用户
    */
-  @Put(':id')
-  async update(@Param('id') id: number, @Body() userData: any) {
-    return this.userService.update(id, userData);
+  @Post('update')
+  async update(@Body('id') id: number, @Body('data') userData: any) {
+    try {
+      const user = await this.userService.update(id, userData);
+      if (!user) {
+        return ResponseUtil.error(StatusCode.NOT_FOUND, '用户不存在');
+      }
+      return ResponseUtil.success(user, '更新用户成功');
+    } catch (error) {
+      return ResponseUtil.error(StatusCode.INTERNAL_SERVER_ERROR, '更新用户失败');
+    }
   }
 
   /**
    * 删除用户
    * 
-   * @Delete(':id') 装饰器：定义DELETE请求的路由，路径为 '/:id'（完整路径：/user/:id）
+   * @Post('delete') 装饰器：定义POST请求的路由，路径为 '/delete'（完整路径：/user/delete）
+   * @Body() 装饰器：从请求体中获取数据并绑定到参数
    * 
-   * @param id 用户ID
+   * @param params 请求参数，包含id
    * @returns 删除结果
    */
-  @Delete(':id')
-  async delete(@Param('id') id: number) {
-    return this.userService.delete(id);
+  @Post('delete')
+  async delete(@Body('id') id: number) {
+    try {
+      const result = await this.userService.delete(id);
+      if (!result) {
+        return ResponseUtil.error(StatusCode.NOT_FOUND, '用户不存在');
+      }
+      return ResponseUtil.success(result, '删除用户成功');
+    } catch (error) {
+      return ResponseUtil.error(StatusCode.INTERNAL_SERVER_ERROR, '删除用户失败');
+    }
   }
 }
